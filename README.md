@@ -1,2 +1,4 @@
-riak_crdt_cookbook
+Riak CRDT Cookbook
 ==================
+
+TODO: Write a README
