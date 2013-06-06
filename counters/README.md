@@ -15,7 +15,7 @@ First off, we're going to use Curl to set some things up. For the rest of this t
 Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely. (NOTE: I've pretty-printed the JSON below, in your console it probably won't look as neat)
 
 ```
-riak (master) $ curl -i http://localhost:10018/buckets/crdt_cookbook/props \
+counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/props \
  -X PUT -d '{"props":{"allow_mult":true}}' -H "Content-Type: application/json"
 
 HTTP/1.1 204 No Content
@@ -25,7 +25,7 @@ Date: Wed, 05 Jun 2013 15:15:55 GMT
 Content-Type: application/json
 Content-Length: 0
 
-riak (master) $ curl -i http://localhost:10018/buckets/crdt_cookbook/props
+counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/props
 HTTP/1.1 200 OK
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
@@ -46,7 +46,7 @@ And now let's use some counters. For this, we have a special endpoint to use ins
 The example we're going to use is hits for pages on a website, mostly because it gives us interesting things we can do with MapReduce tasks later.
 
 ```
-riak (master) $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com \
+counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com \
  -X POST -d "1"
 
 HTTP/1.1 204 No Content
@@ -59,7 +59,7 @@ Content-Length: 0
 This increments the counter at `<<"basho.com">>` in our bucket by one (it will also create the counter if it doesn't yet exist). To increment it by larger values, we can post different values to the counter like below. 
 
 ```
-riak (master) $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com \
+counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com \
  -X POST -d "5"
 
 HTTP/1.1 204 No Content
@@ -74,7 +74,7 @@ Riak's counters also support decrementing by posting a negative number instead o
 It also doesn't matter which node we send the increments to, they will all be accepted:
 
 ```
-riak (master) $ curl -i http://localhost:10028/buckets/crdt_cookbook/counters/basho.com \
+counters $ curl -i http://localhost:10028/buckets/crdt_cookbook/counters/basho.com \
  -X POST -d "1"
 
 HTTP/1.1 204 No Content
@@ -87,7 +87,7 @@ Content-Length: 0
 Now, we can see that this all worked, by grabbing the counter value using a GET to the same URL:
 
 ```
-riak (master) $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com
+counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/counters/basho.com
 
 HTTP/1.1 200 OK
 Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
@@ -97,7 +97,7 @@ Content-Length: 1
 
 7
 
-riak (master) $ curl -i http://localhost:10028/buckets/crdt_cookbook/counters/basho.com
+counters $ curl -i http://localhost:10028/buckets/crdt_cookbook/counters/basho.com
 
 HTTP/1.1 200 OK
 Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
@@ -111,3 +111,34 @@ Content-Length: 1
 And hence you can see that all the counter increments were preserved, despite being sent to different hosts. You can also see that the increment of 5 worked correctly.
 
 Next Up, we're going to find a large corpus of data, get it all into counter objects in Riak, and then do some analysis on the data using MapReduce.
+
+## Loading some Example Data
+
+For this next step, you'll need Ruby 2.0.0 installed, as well as the "bundler" rubygem.
+
+[Bryce Kerley](https://twitter.com/BonzoESC) has kindly provided some data from the Miami user group's site google analytics. Per-day page-view stats are in the "Dataset" directory in csv files, so we'll use those to load our data into some Riak counters.
+
+The easiest way to do so is to run the following:
+
+```
+counters $ bundle install
+
+Using mime-types (1.23)
+Using rest-client (1.6.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+Use `bundle show [gemname]` to see where a bundled gem is installed.
+
+counters $ ./load_data.rb
+
+Loading the data from Dataset/*.csv into Riak.
+Bucket: "crdt_cookbook"
+
+.................................................................
+Finished!
+
+```
+
+Aside: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
+
+And now we're ready to do some MapReduce!
