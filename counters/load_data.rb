@@ -42,7 +42,7 @@ EOM
 Dir["Dataset/Analytics*.csv"].each do |file|
   threads << Thread.start do 
     date = file.match(/\d{8}/)[0]
-    CSV.foreach(file, skip_blanks: true, skip_lines: /\A#/) do |row|
+    CSV.foreach(file) do |row|
       if row[0] && row[0].match(/\A\/miamirb\//i)
         page, count, *_ = row
         increment "#{date}!www.meetup.com#{page}", count
