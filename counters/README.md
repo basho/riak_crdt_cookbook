@@ -142,3 +142,175 @@ Finished!
 Aside: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
 
 And now we're ready to do some MapReduce!
+
+## Map-Reducing our Data
+
+Ok, so next up we're going to do some analysis of the data that's in our counters.
+
+I've written a module, `mr_kv_counters.erl`, that contains the functions we're going to use. 
+
+Firstly, let's run down the functions:
+
+- `value/3`   - takes a riak object, and returns the pair {key, count}
+- `sum/2`     - takes the output of `value/3`, and computes the total count
+- `maximum/2` - takes the output of `value/3`, and computes the list of keys with the highest count
+- `strip_date/2` - 
+
+Now, before we can begin, we'll need to compile this module, and tell riak where to find it.
+
+To compile this module, run the following command. It it works, it gives you no output:
+
+```
+counters $ erlc mr_kv_counters.erl
+```
+
+### Loading our module into Riak
+
+Next Up, we need to edit some of your riak cluster's configuration, via "app.config". First, get yourself in
+a shell in the master riak checkout you made earlier.
+
+We're going to stop the cluster, edit the file, regenerate your dev releases, and then restart the cluster. Like so:
+
+```
+riak $ for d in dev/dev*; do $d/bin/riak stop; done
+
+ok
+ok
+ok
+ok
+ok
+
+```
+
+Now, find `rel/files/app.config`. This is the file we're going to edit. Its syntax is simple enough, it just
+uses Erlang literals. In the `{riak_kv, [ ... ]}` section, add a property that looks like the following
+(only with the correct path). I put it after the `{js_source_dir, ...}` property, so things like that were
+all together.
+
+```
+{add_paths, ["/path/to/riak_crdt_cookbook/counters"]},
+```
+
+Now, we'll regenerate and restart the cluster:
+
+```
+riak $ make devrel
+
+... SNIP ...
+
+riak $ for d in dev/dev*; do $d/bin/riak start; done
+
+
+```
+
+This last command takes about 15 seconds, and if it's successful it doesn't give any output. 
+
+Now, just to check all that worked, we'll attach to a console and see if the module is present
+by typing `m(mr_kv_counters).` when the erlang prompt appears.:
+
+```
+riak $ dev/dev1/bin/riak attach
+
+Erlang R15B03 (erts-5.9.3.1) [source] [64-bit] [smp:4:4] [async-threads:0] [hipe] [kernel-poll:false] [dtrace]
+
+Eshell V5.9.3.1  (abort with ^G)
+(dev1@127.0.0.1)1> m(mr_kv_counters).
+Module mr_kv_counters compiled: Date: June 7 2013, Time: 12.16
+Compiler options:  [{outdir,"/path/to/riak_crdt_cookbook/counters"}]
+Object file: /path/to/riak_crdt_cookbook/counters/mr_kv_counters.beam
+Exports:
+         maximum/2
+         module_info/0
+         module_info/1
+         strip_date/2
+         sum/2
+         value/3
+ok
+
+```
+
+To escape this prompt, hit `<Ctrl>-g`, then enter "q" at the "user switch command" prompt and press return.
+  
+### Map-Reducing time!
+
+Now, we're ready to go map-reducing!
+
+First, open up "mr_sum.json" just to see what the query looks like. Firstly, the string for "input" 
+specifies which bucket to fetch keys from. This is inefficient in production, but is perfect for
+this example, as it's really simple. The list in "query" specifies an ordered list of steps for
+the map-reduce engine to perform. This one firstly maps with `value/3` and then reduces with `sum/2`.
+
+This should give us a total. Let's see:
+
+```
+counters $ curl -i http://localhost:10018/mapred \
+ -X POST -H "Content-Type: application/json" -d @mr_sum.json
+ 
+HTTP/1.1 200 OK
+Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
+Date: Fri, 07 Jun 2013 12:47:11 GMT
+Content-Type: application/json
+Content-Length: 13
+
+{"total":160}
+```
+
+Fantastic! If you don't get the same total, check for partitions, or errors when you ran `./load_data.rb`.
+
+And now for our `max/2` function. The mapreduce query is specified in "mr_max.json". It looks almost exactly like
+what we specified in "mr_sum.json", only with a different reduce phase. 
+
+Let's see what it gives us:
+
+```
+counters $ curl -i http://localhost:10018/mapred \
+ -X POST -H "Content-Type: application/json" -d @mr_max.json
+
+HTTP/1.1 200 OK
+Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
+Date: Fri, 07 Jun 2013 12:53:31 GMT
+Content-Type: application/json
+Content-Length: 39
+
+{"20130605!www.meetup.com/miamirb/":14}
+```
+
+Right, so now we see a slight issue. I had the keys include both the date (8 digits before the "!") and
+the url (everything after the !). This data shows us that the most visited page in any single 24 hours was
+the miamirb front page on the 5th of June, 2013. 
+
+### Advanced Map-Reducing
+
+However, while this is useful, we might want to do something a little more complex. While you can do anything
+you want (within reason) with this data, I'm just going to split off the date, and see which page gets the most 
+visits over the entire period.
+
+To do this, we actually write another *reduce* phase. Yes, a little annoying, but map phases can only accept
+lists of bucket-key pairs as inputs, not arbitrary data. Don't worry too much, what we are up to will become clear.
+
+Go back and read the source of `strip_date/2` in "mr_kv_counters.erl". You'll see we just take the list of key-count pairs,
+strip off the start of the key until the "!" (the first 9 chars), then return the rest of the key with the count 
+for future steps. If there's no "!" in the key, we leave it as is.
+
+```
+counters $ curl -i http://localhost:10018/mapred \
+ -X POST -H "Content-Type: application/json" -d @mr_max_overall.json
+
+HTTP/1.1 200 OK
+Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
+Date: Fri, 07 Jun 2013 13:56:42 GMT
+Content-Type: application/json
+Content-Length: 30
+
+{"www.meetup.com/miamirb/":39}
+
+```
+
+## Wrap-Up
+
+So, we're done. Fantastic, thanks for reading! 
+
+Here are some links for where you can explore various concepts like this further.
+
+- TODO: Links
+
