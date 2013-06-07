@@ -114,7 +114,7 @@ Next Up, we're going to find a large corpus of data, get it all into counter obj
 
 ## Loading some Example Data
 
-For this next step, you'll need Ruby 2.0.0 installed, as well as the "bundler" rubygem.
+For this next step, you'll need Ruby (any version after 1.9.2) installed, as well as the "bundler" rubygem.
 
 [Bryce Kerley](https://twitter.com/BonzoESC) has kindly provided some data from the Miami user group's site google analytics. Per-day page-view stats are in the "Dataset" directory in csv files, so we'll use those to load our data into some Riak counters.
 
