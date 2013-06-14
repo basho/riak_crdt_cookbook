@@ -1,4 +1,4 @@
-# Riak CRDT Cookbook: -> Counters
+# Riak CRDT Cookbook: Counters
 
 Riak KV master (at the time of writing) introduces Counters as a new opaque data type, so here we're going to walk through doing a few things with them using the files in this directory.
 
@@ -12,7 +12,7 @@ First off, get the riak master branch setup, with a several-node dev cluster. Fo
 
 First off, we're going to use Curl to set some things up. For the rest of this tutorial, I'm going to use a bucket called `crdt_cookbook`, for clarity.
 
-Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely. (NOTE: I've pretty-printed the JSON below, in your console it probably won't look as neat)
+Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely. Note: I've pretty-printed the JSON below, in your console it probably won't look as neat
 
 ```
 counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/props \
@@ -110,11 +110,11 @@ Content-Length: 1
 
 And hence you can see that all the counter increments were preserved, despite being sent to different hosts. You can also see that the increment of 5 worked correctly.
 
-Next Up, we're going to find a large corpus of data, get it all into counter objects in Riak, and then do some analysis on the data using MapReduce.
-
 ## Loading some Example Data
 
-For this next step, you'll need Ruby (any version after 1.9.2) installed, as well as the "bundler" rubygem.
+Next Up, we're going to find a large corpus of data, get it all into counter objects in Riak, and then do some analysis on the data using MapReduce. 
+
+For this stage, you'll need Ruby (any version after 1.9.2) installed, as well as the "bundler" rubygem.
 
 [Bryce Kerley](https://twitter.com/BonzoESC) has kindly provided some data from the Miami user group's site google analytics. Per-day page-view stats are in the "Dataset" directory in csv files, so we'll use those to load our data into some Riak counters.
 
@@ -139,7 +139,7 @@ Finished!
 
 ```
 
-Aside: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
+> Note: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
 
 And now we're ready to do some MapReduce!
 
@@ -166,56 +166,23 @@ counters $ erlc mr_kv_counters.erl
 
 ### Loading our module into Riak
 
+> Note: In a production setting, you'd alter each node's configuration, and then restart each node, to load more code. We're going to cheat, to save time.
+
 Next Up, we need to edit some of your riak cluster's configuration, via "app.config". First, get yourself in
 a shell in the master riak checkout you made earlier.
 
-We're going to stop the cluster, edit the file, regenerate your dev releases, and then restart the cluster. Like so:
+Now, attach a console to the cluster by running `dev/dev1/bin/riak attach`. From now on, the commands will be executed in the Erlang Shell.
+  
+So, at the Erlang Shell, enter everything after the `>`, not forgetting the `.` at the end which is obligatory:
 
 ```
-riak $ for d in dev/dev*; do $d/bin/riak stop; done
+(dev1@127.0.0.1)1> rpc:multicall(code, add_patha, ["/path/to/riak_crdt_cookbook/counters"]).
 
-ok
-ok
-ok
-ok
-ok
+{[true,true,true,true],[]}
 
-```
+(dev1@127.0.0.1)2> m(mr_kv_counters).
 
-Now, find `rel/files/app.config`. This is the file we're going to edit. Its syntax is simple enough, it just
-uses Erlang literals. In the `{riak_kv, [ ... ]}` section, add a property that looks like the following
-(only with the correct path). I put it after the `{js_source_dir, ...}` property, so things like that were
-all together.
-
-```
-{add_paths, ["/path/to/riak_crdt_cookbook/counters"]},
-```
-
-Now, we'll regenerate and restart the cluster:
-
-```
-riak $ make devrel
-
-... SNIP ...
-
-riak $ for d in dev/dev*; do $d/bin/riak start; done
-
-
-```
-
-This last command takes about 15 seconds, and if it's successful it doesn't give any output. 
-
-Now, just to check all that worked, we'll attach to a console and see if the module is present
-by typing `m(mr_kv_counters).` when the erlang prompt appears.:
-
-```
-riak $ dev/dev1/bin/riak attach
-
-Erlang R15B03 (erts-5.9.3.1) [source] [64-bit] [smp:4:4] [async-threads:0] [hipe] [kernel-poll:false] [dtrace]
-
-Eshell V5.9.3.1  (abort with ^G)
-(dev1@127.0.0.1)1> m(mr_kv_counters).
-Module mr_kv_counters compiled: Date: June 7 2013, Time: 12.16
+Module mr_kv_counters compiled: Date: June 7 2013, Time: 13.52
 Compiler options:  [{outdir,"/path/to/riak_crdt_cookbook/counters"}]
 Object file: /path/to/riak_crdt_cookbook/counters/mr_kv_counters.beam
 Exports:
@@ -229,7 +196,7 @@ ok
 
 ```
 
-To escape this prompt, hit `<Ctrl>-g`, then enter "q" at the "user switch command" prompt and press return.
+To escape this prompt, hit `<Ctrl>-g`, then enter "q" at the "user switch command" prompt and press return. You should get back to your original shell if you do this.
   
 ### Map-Reducing time!
 
