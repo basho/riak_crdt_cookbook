@@ -139,6 +139,19 @@ Bucket: "crdt_cookbook"
 Finished!
 
 ```
+<!-- on ubuntu 13.04, I ran `sudo apt-get install bundler` and I get the following error trying to call ./load_data.rb:
+
+
+$ ./load_data.rb 
+/usr/bin/env: bundle exec ruby: No such file or directory
+
+Calling it as
+
+$ bundle exec ruby load_data.rb 
+
+Works though; not sure if it is user error or not
+
+-->
 
 > Note: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
 
