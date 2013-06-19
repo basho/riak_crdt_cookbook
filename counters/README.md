@@ -12,7 +12,9 @@ First off, get the riak master branch setup, with a several-node dev cluster. Fo
 
 First off, we're going to use Curl to set some things up. For the rest of this tutorial, I'm going to use a bucket called `crdt_cookbook`, for clarity.
 
-Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely. Note: I've pretty-printed the JSON below, in your console it probably won't look as neat
+Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely.
+
+> Note: I've pretty-printed the JSON below, in your console it probably won't look as neat
 
 ```
 counters $ curl -i http://localhost:10018/buckets/crdt_cookbook/props \
@@ -207,7 +209,7 @@ specifies which bucket to fetch keys from. This is inefficient in production, bu
 this example, as it's really simple. The list in "query" specifies an ordered list of steps for
 the map-reduce engine to perform. This one firstly maps with `value/3` and then reduces with `sum/2`.
 
-> Note: Providing a bucket name to a MapReduce task is very inefficient (it causes a keyscan).  In production, there are other, better ways to select bucket-key pairs as inputs, including secondary indexes.
+> Note: Providing a bucket name to a MapReduce task is very inefficient (it causes a keyscan).  In production, there are other, better ways to select bucket-key pairs as inputs, the most efficient of which is to pass in a list of bucket-key pairs.
 
 This should give us a total. Let's see:
 
