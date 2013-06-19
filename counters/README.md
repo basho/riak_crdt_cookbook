@@ -12,7 +12,7 @@ First off, get the riak master branch setup, with a several-node dev cluster. Fo
 
 First off, we're going to use Curl to set some things up. For the rest of this tutorial, I'm going to use a bucket called `crdt_cookbook`, for clarity.
 
-Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely.
+Quick, Important Interlude: Counters require the bucket property `allow_mult` to be true, so we'll set that first. Don't worry about this, the whole point in CRDTs is that they cope with siblings completely. 
 
 > Note: I've pretty-printed the JSON below, in your console it probably won't look as neat
 
@@ -281,7 +281,18 @@ Content-Length: 30
 
 So, we're done. Fantastic, thanks for reading! 
 
-Here are some links for where you can explore various concepts like this further.
+Here are some links for where you can explore various concepts further.
 
-- TODO: Links
+### Riak:
 
+- [riak/docs: Eventual Consistency](http://docs.basho.com/riak/latest/references/appendices/concepts/Eventual-Consistency/) - What Riak's Eventual Consistency means for your application.
+- [riak/docs: Buckets](http://docs.basho.com/riak/latest/references/appendices/concepts/Buckets/) - What Riak's Bucket settings really mean (especially about `allow_mult`, the other properties are not so important).
+- [riak/docs: MapReduce Overview](http://docs.basho.com/riak/latest/tutorials/querying/MapReduce/) - A High-level overview of Riak's MapReduce system. It has links to further articles
+
+### CRDTs
+
+Here are links to more info about Convergent Replicated Data Types (the state-based variant):
+
+- [A comprehensive study of Convergent and Commutative Replicated Data Types](http://hal.upmc.fr/docs/00/55/55/88/PDF/techreport.pdf) [PDF] - This describes the concepts behind CRDTs, both state-based (convergent, aka CvRDTs) and operation-based (commutative, aka CmRDTs).
+- [basho/riak_kv riak_kv_counter.erl](https://github.com/basho/riak_kv/blob/master/src/riak_kv_counter.erl) - The source code of the counter implementation, with notes about which CRDT is actually used (PN-Counters, if you're wondering).
+- [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak.
