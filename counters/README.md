@@ -295,4 +295,4 @@ Here are links to more info about Convergent Replicated Data Types (the state-ba
 
 - [A comprehensive study of Convergent and Commutative Replicated Data Types](http://hal.upmc.fr/docs/00/55/55/88/PDF/techreport.pdf) [PDF] - This describes the concepts behind CRDTs, both state-based (convergent, aka CvRDTs) and operation-based (commutative, aka CmRDTs).
 - [basho/riak_kv riak_kv_counter.erl](https://github.com/basho/riak_kv/blob/master/src/riak_kv_counter.erl) - The source code of the counter implementation, with notes about which CRDT is actually used (PN-Counters, if you're wondering).
-- [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak.
+- [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak. There's a demo at about `28:30` that shows what happens during and after a network partition.
