@@ -129,7 +129,7 @@ Using bundler (1.3.5)
 Your bundle is complete!
 Use `bundle show [gemname]` to see where a bundled gem is installed.
 
-counters $ ./load_data.rb
+counters $ bundle exec ./load_data.rb
 
 Loading the data from Dataset/*.csv into Riak.
 Bucket: "crdt_cookbook"
@@ -139,7 +139,7 @@ Finished!
 
 ```
 
-> Note: If you screw up, I wrote `./clear_counters.rb` so you can clear out the "crdt_cookbook" bucket
+> Note: If anything goes wrong, run `bundle exec ./clear_counters.rb` which clears out the "crdt_cookbook" bucket completely.
 
 And now we're ready to do some MapReduce!
 
@@ -224,7 +224,7 @@ Content-Length: 13
 {"total":160}
 ```
 
-Fantastic! If you don't get the same total, check for partitions, or errors when you ran `./load_data.rb`.
+Fantastic! If you don't get the same total, check for partitions, or errors when you ran `bundle exec ./load_data.rb`.
 
 And now for our `max/2` function. The mapreduce query is specified in "mr_max.json". It looks almost exactly like
 what we specified in "mr_sum.json", only with a different reduce phase. 
