@@ -319,4 +319,7 @@ Here are links to more info about Convergent Replicated Data Types (the state-ba
 - [basho/riak_kv riak_kv_counter.erl](https://github.com/basho/riak_kv/blob/master/src/riak_kv_counter.erl) - The source code of the counter implementation, with notes about which CRDT is actually used (PN-Counters, if you're wondering).
 - [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak. There's a demo at about [28:30](http://vimeo.com/52414903#t=28m37s) that shows what happens during and after a network partition.
   
-  **A Little Something Extra:** We've included a copy of the demo that Russell did in that presentation. To get started, run `./counters_demo_setup.sh`, which includes instructions on how to run a demo with partitions. It's absolutely magical to watch on your own computer.
+
+## One more thing...
+
+We've included a copy of the demo that Russell did in that presentation. To get started, run `./counters_demo_setup.sh`, which will print instructions on how to run a demo with partitions. It's absolutely magical to watch on your own computer.
