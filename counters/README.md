@@ -7,6 +7,7 @@ This cookbook should take you, the reader, from starting out, not having a clue 
 ##Let's Get Setup
 
 First off, get the riak master branch setup, with a several-node dev cluster. Follow the [Riak Fast Track: Building a Development Environment](http://docs.basho.com/riak/latest/tutorials/fast-track/Building-a-Development-Environment/), but when installing use the "Installing from GitHub" section of [Installing Riak from Source](http://docs.basho.com/riak/latest/tutorials/installation/Installing-Riak-from-Source/) then continue building your development environment. 
+<!-- Installing from github doesn't seem to exist in the docs link.  I had to build the basho/riak riak-1.4.0pre1 tag-->
 
 ## Baby Steps
 
@@ -140,6 +141,19 @@ Bucket: "crdt_cookbook"
 Finished!
 
 ```
+<!-- on ubuntu 13.04, I ran `sudo apt-get install bundler` and I get the following error trying to call ./load_data.rb:
+
+
+$ ./load_data.rb 
+/usr/bin/env: bundle exec ruby: No such file or directory
+
+Calling it as
+
+$ bundle exec ruby load_data.rb 
+
+Works though; not sure if it is user error or not
+
+-->
 
 > Note: If anything goes wrong, run `bundle exec ./clear_counters.rb` which clears out the "crdt_cookbook" bucket completely.
 
