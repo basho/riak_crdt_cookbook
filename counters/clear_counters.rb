@@ -31,8 +31,12 @@ json = JSON.parse keys_response
 
 json["keys"].each do |key|
   threads << Thread.start do
-    RestClient.delete "http://#{$riak_host}/buckets/#{e $bucket}/keys/#{e key}"
-    $stdout.print "."
+    begin
+      RestClient.delete "http://#{$riak_host}/buckets/#{e $bucket}/keys/#{e key}"
+      $stdout.print "."
+    rescue RestClient::ResourceNotFound => e
+      # Ignore
+    end
   end
 end
 

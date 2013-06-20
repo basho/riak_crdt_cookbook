@@ -2,11 +2,36 @@
 
 Riak KV master (at the time of writing) introduces Counters as a new opaque data type, so here we're going to walk through doing a few things with them using the files in this directory.
 
-This cookbook should take you, the reader, from starting out, not having a clue about what they are and how they work, to being able to use them fully, even in Map-Reduce tasks.
+This cookbook should take you, a developer, from starting out, not having a clue about what they are and how they work, to being able to use them fully, even in MapReduce tasks.
 
 ##Let's Get Setup
 
-First off, get the riak master branch setup, with a several-node dev cluster. Follow the [Riak Fast Track: Building a Development Environment](http://docs.basho.com/riak/latest/tutorials/fast-track/Building-a-Development-Environment/), but when installing use the "Installing from GitHub" section of [Installing Riak from Source](http://docs.basho.com/riak/latest/tutorials/installation/Installing-Riak-from-Source/) then continue building your development environment. 
+First off, get the Riak master branch setup, with a several-node dev cluster. Follow the [Riak Fast Track: Building a Development Environment](http://docs.basho.com/riak/latest/tutorials/fast-track/Building-a-Development-Environment/), but when installing use the "Installing from GitHub" section of [Installing Riak from Source](http://docs.basho.com/riak/latest/tutorials/installation/Installing-Riak-from-Source/) then continue building your development environment.
+
+Here's a longer list of what you're going to need:
+
+- Git
+- Erlang (R14B03 or R15B01)
+- A Set of Build Tools (needed to build Riak from master)
+- Ruby 1.9.3
+- Bundler (easiest installed as a ruby gem)
+- A 4-node Riak "dev" cluster
+
+Let's start by cloning this repository and cd into "counters" (you may need to checkout a branch to get the counters directory):
+
+```
+$ git clone https://github.com/lenary/riak_crdt_cookbook.git
+
+Cloning into 'riak_crdt_cookbook'...
+remote: Counting objects: 71, done.
+remote: Compressing objects: 100% (37/37), done.
+remote: Total 71 (delta 40), reused 60 (delta 30)
+Unpacking objects: 100% (71/71), done.
+
+$ cd riak_crdt_cookbook/counters
+
+counters $ 
+```
 
 ## Baby Steps
 
@@ -145,7 +170,7 @@ Finished!
 
 And now we're ready to do some MapReduce!
 
-## Map-Reducing our Data
+## MapReduce-ing our Data
 
 Ok, so next up we're going to do some analysis of the data that's in our counters.
 
@@ -153,12 +178,12 @@ I've written a module, `mr_kv_counters.erl`, that contains the functions we're g
 
 Firstly, let's run down the functions:
 
-- `value/3`   - takes a riak object, and returns the pair {key, count}
+- `value/3`   - takes a Riak object, and returns the pair {key, count}
 - `sum/2`     - takes the output of `value/3`, and computes the total count
 - `maximum/2` - takes the output of `value/3`, and computes the list of keys with the highest count
 - `strip_date/2` - 
 
-Now, before we can begin, we'll need to compile this module, and tell riak where to find it.
+Now, before we can begin, we'll need to compile this module, and tell Riak where to find it.
 
 To compile this module, run the following command. It it works, it gives you no output:
 
@@ -168,12 +193,9 @@ counters $ erlc mr_kv_counters.erl
 
 ### Loading our module into Riak
 
-> Note: In a production setting, you'd alter each node's configuration, and then restart each node, to load more code. We're going to cheat, to save time.
+> Note: In a production setting, you'd alter each node's configuration in "app.config", and then restart each node, to load more code. We're going to cheat, to save time.
 
-Next Up, we need to edit some of your riak cluster's configuration, via "app.config". First, get yourself in
-a shell in the master riak checkout you made earlier.
-
-Now, attach a console to the cluster by running `dev/dev1/bin/riak attach`. From now on, the commands will be executed in the Erlang Shell.
+Next Up, attach a console to the cluster by running `dev/dev1/bin/riak attach` in the root of your Riak master checkout that you made earlier. From now on, the commands will be executed in the Erlang Shell.
   
 So, at the Erlang Shell, enter everything after the `>`, not forgetting the `.` at the end which is obligatory:
 
@@ -200,14 +222,14 @@ ok
 
 To escape this prompt, hit `<Ctrl>-g`, then enter "q" at the "user switch command" prompt and press return. You should get back to your original shell if you do this.
   
-### Map-Reducing time!
+### Time to MapReduce!
 
-Now, we're ready to go map-reducing!
+Now, we're ready to go MapReduce-ing!
 
 First, open up "mr_sum.json" just to see what the query looks like. Firstly, the string for "input" 
 specifies which bucket to fetch keys from. This is inefficient in production, but is perfect for
 this example, as it's really simple. The list in "query" specifies an ordered list of steps for
-the map-reduce engine to perform. This one firstly maps with `value/3` and then reduces with `sum/2`.
+the MapReduce engine to perform. This one firstly maps with `value/3` and then reduces with `sum/2`.
 
 > Note: Providing a bucket name to a MapReduce task is very inefficient (it causes a keyscan).  In production, there are other, better ways to select bucket-key pairs as inputs, the most efficient of which is to pass in a list of bucket-key pairs.
 
@@ -250,7 +272,7 @@ Right, so now we see a slight issue. I had the keys include both the date (8 dig
 the url (everything after the !). This data shows us that the most visited page in any single 24 hours was
 the miamirb front page on the 5th of June, 2013. 
 
-### Advanced Map-Reducing
+### Advanced MapReduce-ing
 
 However, while this is useful, we might want to do something a little more complex. While you can do anything
 you want (within reason) with this data, I'm just going to split off the date, and see which page gets the most 
@@ -295,4 +317,6 @@ Here are links to more info about Convergent Replicated Data Types (the state-ba
 
 - [A comprehensive study of Convergent and Commutative Replicated Data Types](http://hal.upmc.fr/docs/00/55/55/88/PDF/techreport.pdf) [PDF] - This describes the concepts behind CRDTs, both state-based (convergent, aka CvRDTs) and operation-based (commutative, aka CmRDTs).
 - [basho/riak_kv riak_kv_counter.erl](https://github.com/basho/riak_kv/blob/master/src/riak_kv_counter.erl) - The source code of the counter implementation, with notes about which CRDT is actually used (PN-Counters, if you're wondering).
-- [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak. There's a demo at about `28:30` that shows what happens during and after a network partition.
+- [Data Structures in Riak - RICON 2012](http://vimeo.com/52414903) - A talk by Sean Cribbs and Russell Brown at RICON 2012, including a proof-of-concept implementation of CRDTs in Riak. There's a demo at about [28:30](http://vimeo.com/52414903#t=28m37s) that shows what happens during and after a network partition.
+  
+  **A Little Something Extra:** We've included a copy of the demo that Russell did in that presentation. To get started, run `./counters_demo_setup.sh`, which includes instructions on how to run a demo with partitions. It's absolutely magical to watch on your own computer.
