@@ -1,0 +1,19 @@
+{
+    "inputs": "crdt_cookbook", 
+    "query": [
+        {
+            "map": {
+                "language": "erlang",
+                "module":   "mr_kv_counters",
+                "function": "value", 
+            }
+        },
+        {
+            "reduce": {
+                "language": "erlang",
+                "module":   "mr_kv_counters",
+                "function": "maximum"
+            }
+        }
+    ]
+}
