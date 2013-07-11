@@ -1,0 +1,7 @@
+# A sample Gemfile
+source "https://rubygems.org"
+
+# The Ruby Riak Client (at the time of writing) doesn't support counters. 
+# It will, but for the moment I'm going to use rest-client so that the 
+# operations are obvious.
+gem "rest-client", "~> 1.6.7"
