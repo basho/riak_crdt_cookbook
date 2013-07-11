@@ -1,23 +1,23 @@
 # Riak CRDT Cookbook: Counters
 
-Riak KV master (at the time of writing) introduces Counters as a new opaque data type, so here we're going to walk through doing a few things with them using the files in this directory.
+Riak 1.4 introduces Counters as a new opaque data type, so here we're going to walk through doing a few things with them using the files in this directory.
 
 This cookbook should take you, a developer, from starting out, not having a clue about what they are and how they work, to being able to use them fully, even in MapReduce tasks.
 
 ##Let's Get Setup
 
-First off, get the Riak master branch setup, with a several-node dev cluster. Follow the [Riak Fast Track: Building a Development Environment](http://docs.basho.com/riak/latest/tutorials/fast-track/Building-a-Development-Environment/), but when installing use the "Installing from GitHub" section of [Installing Riak from Source](http://docs.basho.com/riak/latest/tutorials/installation/Installing-Riak-from-Source/) then continue building your development environment.
+First off, get a Riak 1.4+ dev cluster setup. Follow the [Riak Fast Track: Building a Development Environment](http://docs.basho.com/riak/latest/tutorials/fast-track/Building-a-Development-Environment/), making sure to install from the 1.4 **from source**, and then follow from "Use Rebar to Start Up Four Nodes".
 
 Here's a longer list of what you're going to need:
 
 - Git
 - Erlang (R14B03 or R15B01)
-- A Set of Build Tools (needed to build Riak from master)
+- A Set of Build Tools (needed to build Riak 1.4)
 - Ruby 1.9.3
 - Bundler (easiest installed as a ruby gem)
-- A 4-node Riak "dev" cluster
+- A 4-node Riak 1.4 "dev" cluster
 
-Let's start by cloning this repository and cd into "counters" (you may need to checkout a branch to get the counters directory):
+You'll also want to clone this repository and cd into "counters":
 
 ```
 $ git clone https://github.com/lenary/riak_crdt_cookbook.git
@@ -310,6 +310,7 @@ Here are some links for where you can explore various concepts further.
 - [riak/docs: Eventual Consistency](http://docs.basho.com/riak/latest/references/appendices/concepts/Eventual-Consistency/) - What Riak's Eventual Consistency means for your application.
 - [riak/docs: Buckets](http://docs.basho.com/riak/latest/references/appendices/concepts/Buckets/) - What Riak's Bucket settings really mean (especially about `allow_mult`, the other properties are not so important).
 - [riak/docs: MapReduce Overview](http://docs.basho.com/riak/latest/tutorials/querying/MapReduce/) - A High-level overview of Riak's MapReduce system. It has links to further articles
+- [riak/docs: HTTP Counters API](http://docs.basho.com/riak/latest/references/apis/http/HTTP-Counters/) - The HTTP API Reference for Counters.
 
 ### CRDTs
 
