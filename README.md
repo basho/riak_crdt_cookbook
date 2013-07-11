@@ -7,5 +7,5 @@ They are simple and allow you to get a feel of what you can do with the CRDTs.
 
 Completed Cookbooks:
 
-- [counters](Counters) [Riak 1.4+]
+- [Counters](counters) [Riak 1.4+]
 
