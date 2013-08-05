@@ -174,7 +174,7 @@ And now we're ready to do some MapReduce!
 
 Ok, so next up we're going to do some analysis of the data that's in our counters.
 
-I've written a module, `mr_kv_counters.erl`, that contains the functions we're going to use. 
+I've written a module, `mr_kv_counters.erl`, that contains the functions we're going to use. Unfortunately Counters cannot be MapReduced from JavaScript, so you're going to have to use Erlang.
 
 Firstly, let's run down the functions:
 
